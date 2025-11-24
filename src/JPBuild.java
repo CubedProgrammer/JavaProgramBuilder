@@ -59,11 +59,14 @@ public final class JPBuild
 	}
 	public void execute()
 	{
-		Runtime rt=Runtime.getRuntime();
 		String[]cmd={"java","-cp",options.output,options.main};
 		try
 		{
-			Process p=rt.exec(cmd);
+			ProcessBuilder builder=new ProcessBuilder(cmd);
+			builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			Process p=builder.start();
 			p.waitFor();
 		}
 		catch(InterruptedException|IOException e){}
