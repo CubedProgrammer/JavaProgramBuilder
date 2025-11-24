@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-public class JPBuild
+public final class JPBuild
 {
 	private final Configuration options;
 	public JPBuild(Configuration options)
@@ -56,5 +56,16 @@ public class JPBuild
 				catch(IOException e){}
 			}
 		}
+	}
+	public void execute()
+	{
+		Runtime rt=Runtime.getRuntime();
+		String[]cmd={"java","-cp",options.output,options.main};
+		try
+		{
+			Process p=rt.exec(cmd);
+			p.waitFor();
+		}
+		catch(InterruptedException|IOException e){}
 	}
 }

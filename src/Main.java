@@ -1,13 +1,33 @@
 import java.io.File;
 import java.io.IOException;
-public class Main
+public final class Main
 {
-	public static void main(String[]args)throws IOException
+	public static final int BUILD=0;
+	public static final int EXECUTE=1;
+	public static final int getMode(String[]args)
+	{
+		int mode=BUILD;
+		if(args.length>0)
+		{
+			mode=switch(args[0])
+			{
+				case"build"->BUILD;
+				case"run"->EXECUTE;
+				default->BUILD;
+			};
+		}
+		return mode;
+	}
+	public static final void main(String[]args)throws IOException
 	{
 		final String current=new File(".").getCanonicalFile().getName();
 		final File conffile=new File(current+".conf");
 		final Configuration configuration=Configuration.parseConfigurationFile(conffile).orElse(new Configuration());
 		final JPBuild builder=new JPBuild(configuration);
-		builder.jpbuild();
+		switch(getMode(args))
+		{
+			case BUILD->builder.jpbuild();
+			case EXECUTE->builder.execute();
+		}
 	}
 }

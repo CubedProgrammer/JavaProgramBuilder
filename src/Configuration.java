@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
-public class Configuration
+public final class Configuration
 {
 	public static final String CURLIES="{}";
 	public ArrayList<String>classpath;
