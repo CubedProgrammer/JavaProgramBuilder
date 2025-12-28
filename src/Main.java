@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 public final class Main
 {
 	public static final int BUILD=0;
@@ -27,7 +28,7 @@ public final class Main
 		switch(getMode(args))
 		{
 			case BUILD->builder.jpbuild();
-			case EXECUTE->builder.execute();
+			case EXECUTE->builder.execute(Arrays.copyOfRange(args,1,args.length));
 		}
 	}
 }

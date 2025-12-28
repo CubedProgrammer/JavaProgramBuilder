@@ -57,9 +57,14 @@ public final class JPBuild
 			}
 		}
 	}
-	public void execute()
+	public void execute(String[]args)
 	{
-		String[]cmd={"java","-cp",options.output,options.main};
+		options.classpath.add(options.output);
+		String cp=String.join(":",options.classpath);
+		String[]firstargs={"java","-cp",cp,options.main};
+		String[]cmd=new String[args.length+firstargs.length];
+        System.arraycopy(firstargs,0,cmd,0,firstargs.length);
+		System.arraycopy(args,0,cmd,firstargs.length,args.length);
 		try
 		{
 			ProcessBuilder builder=new ProcessBuilder(cmd);
