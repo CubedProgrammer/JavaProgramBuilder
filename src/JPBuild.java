@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 public final class JPBuild
 {
-	public static void runCommand(String[]command)
+	public static final String LAUNCHER_CODE="char*const args[256]={\"java\",\"-jar\",\"%s\"};memcpy(args,a+1,(l-1)*sizeof(char*const));return execvp(\"java\",args);";
+	public static final String LAUNCHER_BOILERPLATE="#include<string.h>\n#include<unistd.h>\nint main(int l,char**a){%s}\n";
+	public static final void runCommand(String[]command)
 	{
 		try
 		{
@@ -25,7 +27,6 @@ public final class JPBuild
 	}
 	public void jpbuild()
 	{
-		Runtime rt=Runtime.getRuntime();
 		String cp=String.join(":",options.classpath);
 		String[]cmd=new String[options.options.size()+6];
 		cmd[0]="javac";
@@ -73,11 +74,17 @@ public final class JPBuild
 		String[]cmd=new String[args.length+firstargs.length];
         System.arraycopy(firstargs,0,cmd,0,firstargs.length);
 		System.arraycopy(args,0,cmd,firstargs.length,args.length);
+		System.out.println(java.util.Arrays.toString(cmd));
 		runCommand(cmd);
 	}
 	public void archive()
 	{
 		String[]cmd={"jar","cfe",options.artifact,options.main,"-C",options.output,"."};
 		runCommand(cmd);
+	}
+	public void makeNativeLauncher()
+	{
+		String code=String.format(LAUNCHER_BOILERPLATE,String.format(LAUNCHER_CODE,options.artifact));
+		System.out.println(code);
 	}
 }

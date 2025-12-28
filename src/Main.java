@@ -6,6 +6,7 @@ public final class Main
 	public static final int BUILD=0;
 	public static final int EXECUTE=1;
 	public static final int ARCHIVE=2;
+	public static final int NATIVE=3;
 	public static final int getMode(String[]args)
 	{
 		int mode=BUILD;
@@ -16,6 +17,7 @@ public final class Main
 				case"build"->BUILD;
 				case"run"->EXECUTE;
 				case"archive"->ARCHIVE;
+				case"launcher"->NATIVE;
 				default->BUILD;
 			};
 		}
@@ -32,6 +34,7 @@ public final class Main
 			case BUILD->builder.jpbuild();
 			case EXECUTE->builder.execute(Arrays.copyOfRange(args,1,args.length));
 			case ARCHIVE->builder.archive();
+			case NATIVE->builder.makeNativeLauncher();
 		}
 	}
 }
