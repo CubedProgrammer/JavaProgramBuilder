@@ -5,6 +5,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 public final class JPBuild
 {
+	public static void runCommand(String[]command)
+	{
+		try
+		{
+			ProcessBuilder builder=new ProcessBuilder(command);
+			builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			Process p=builder.start();
+			p.waitFor();
+		}
+		catch(InterruptedException|IOException e){}
+	}
 	private final Configuration options;
 	public JPBuild(Configuration options)
 	{
@@ -43,12 +56,7 @@ public final class JPBuild
 							{
 								cmd[cmd.length-1]=fileString;
 								System.out.println(String.join(" ",cmd));
-								try
-								{
-									Process p=rt.exec(cmd);
-									p.waitFor();
-								}
-								catch(InterruptedException|IOException e){}
+								runCommand(cmd);
 							}
 						}
 					});
@@ -65,15 +73,11 @@ public final class JPBuild
 		String[]cmd=new String[args.length+firstargs.length];
         System.arraycopy(firstargs,0,cmd,0,firstargs.length);
 		System.arraycopy(args,0,cmd,firstargs.length,args.length);
-		try
-		{
-			ProcessBuilder builder=new ProcessBuilder(cmd);
-			builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
-			builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-			builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-			Process p=builder.start();
-			p.waitFor();
-		}
-		catch(InterruptedException|IOException e){}
+		runCommand(cmd);
+	}
+	public void archive()
+	{
+		String[]cmd={"jar","cfe",options.artifact,options.main,"-C",options.output,"."};
+		runCommand(cmd);
 	}
 }
