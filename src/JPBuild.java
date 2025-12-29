@@ -1,12 +1,14 @@
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 public final class JPBuild
 {
-	public static final String LAUNCHER_CODE="char*const args[256]={\"java\",\"-jar\",\"%s\"};memcpy(args,a+1,(l-1)*sizeof(char*const));return execvp(\"java\",args);";
-	public static final String LAUNCHER_BOILERPLATE="#include<string.h>\n#include<unistd.h>\nint main(int l,char**a){%s}\n";
+	public static final String LAUNCHER_REALPATH="char jar[4096];realpath(\"/proc/self/exe\",jar);*strrchr(jar,'/')=0;strcat(jar,\"/%s\");";
+	public static final String LAUNCHER_CODE="char*args[256]={\"java\",\"-jar\",jar};memcpy(args+3,a+1,(l-1)*sizeof(char*const));return execvp(\"java\",args);";
+	public static final String LAUNCHER_BOILERPLATE="#include<stdlib.h>\n#include<string.h>\n#include<unistd.h>\nint main(int l,char**a){%s}\n";
 	public static final void runCommand(String[]command)
 	{
 		try
@@ -84,7 +86,11 @@ public final class JPBuild
 	}
 	public void makeNativeLauncher()
 	{
-		String code=String.format(LAUNCHER_BOILERPLATE,String.format(LAUNCHER_CODE,options.artifact));
-		System.out.println(code);
+		String code=String.format(LAUNCHER_BOILERPLATE,String.format(LAUNCHER_REALPATH,options.artifact)+LAUNCHER_CODE);
+		try(FileOutputStream out=new FileOutputStream(options.artifact+".c"))
+		{
+			out.write(code.getBytes());
+		}
+		catch(IOException e){}
 	}
 }
