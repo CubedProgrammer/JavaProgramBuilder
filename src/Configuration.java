@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -14,60 +15,84 @@ public final class Configuration
 	public String output;
 	public String artifact;
 	public String main;
-	public static Optional<Configuration>parseConfigurationFile(File file)
+	public static Configuration parseConfiguration(String[]args)
 	{
-		Optional<Configuration>o=Optional.empty();
 		Configuration configuration=new Configuration();
 		int depth=0;
-		try(Scanner scanner=new Scanner(new BufferedReader(new FileReader(file))))
+		Optional<Field>fieldO=Optional.empty();
+		for(String s:args)
 		{
-			Optional<Field>fieldO=Optional.empty();
-			while(scanner.hasNextLine())
+			s=s.strip();
+			if(CURLIES.substring(0,1).equals(s))
 			{
-				String s=scanner.nextLine().strip();
-				if(CURLIES.substring(0,1).equals(s))
+				++depth;
+			}
+			else if(CURLIES.substring(1,2).equals(s))
+			{
+				--depth;
+				if(depth==0)
 				{
-					++depth;
+					fieldO=Optional.empty();
 				}
-				else if(CURLIES.substring(1,2).equals(s))
+			}
+			else if(fieldO.isEmpty())
+			{
+				Field field=null;
+				try
 				{
-					--depth;
-					if(depth==0)
-					{
-						fieldO=Optional.empty();
-					}
+					field=Configuration.class.getField(s.toLowerCase());
 				}
-				else if(fieldO.isEmpty())
+				catch(NoSuchFieldException e){}
+				fieldO=Optional.ofNullable(field);
+			}
+			else
+			{
+				if(String.class.equals(fieldO.get().getType()))
 				{
-					Field field=null;
 					try
-					{
-						field=Configuration.class.getField(s.toLowerCase());
-					}
-					catch(NoSuchFieldException e){}
-					fieldO=Optional.ofNullable(field);
-				}
-				else
-				{
-					if(String.class.equals(fieldO.get().getType()))
 					{
 						fieldO.get().set(configuration,s);
 					}
-					else
+					catch(IllegalAccessException e)
+					{
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					try
 					{
 						@SuppressWarnings("unchecked")
 						var array=(ArrayList<String>)fieldO.get().get(configuration);
 						array.add(s);
 					}
-					if(depth==0)
+					catch(IllegalAccessException e)
 					{
-						fieldO=Optional.empty();
+						e.printStackTrace();
 					}
 				}
+				if(depth==0)
+				{
+					fieldO=Optional.empty();
+				}
 			}
-			o=Optional.of(configuration);
 		}
-		catch(FileNotFoundException|IllegalAccessException e){}
+		return configuration;
+	}
+	public static Optional<Configuration>parseConfigurationFile(File file)
+	{
+		Optional<Configuration>o=Optional.empty();
+		try(BufferedReader reader=new BufferedReader(new FileReader(file)))
+		{
+			char[]buf=new char[1024];
+			StringBuilder builder=new StringBuilder();
+			for(int b=reader.read(buf);b>0;b=reader.read(buf))
+			{
+				builder.append(buf,0,b);
+			}
+			o=Optional.of(parseConfiguration(builder.toString().split("\n")));
+		}
+		catch(IOException e){}
 		return o;
 	}
     @SuppressWarnings("Convert2Diamond")
