@@ -27,7 +27,7 @@ public final class Main
 	{
 		final String current=new File(".").getCanonicalFile().getName();
 		final File conffile=new File(current+".conf");
-		final Configuration configuration=Configuration.parseConfigurationFile(conffile).orElse(new Configuration());
+		final Configuration configuration=args.length>1?Configuration.parseConfiguration(Arrays.copyOfRange(args,1,args.length)):Configuration.parseConfigurationFile(conffile).orElse(new Configuration());
 		final JPBuild builder=new JPBuild(configuration);
 		switch(getMode(args))
 		{

@@ -1,12 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Scanner;
+import java.util.function.Consumer;
 public final class Configuration
 {
 	public static final String CURLIES="{}";
@@ -15,11 +13,31 @@ public final class Configuration
 	public String output;
 	public String artifact;
 	public String main;
+	public void setOutput(String output)
+	{
+		this.output=output;
+	}
+	public void setArtifact(String artifact)
+	{
+        this.artifact=artifact;
+    }
+    public void setMain(String main)
+	{
+        this.main=main;
+    }
+	public void addToCP(String path)
+	{
+		this.classpath.add(path);
+	}
+	public void addToOptions(String option)
+	{
+		this.options.add(option);
+	}
 	public static Configuration parseConfiguration(String[]args)
 	{
 		Configuration configuration=new Configuration();
 		int depth=0;
-		Optional<Field>fieldO=Optional.empty();
+		Optional<Consumer<String>>setter=Optional.empty();
 		for(String s:args)
 		{
 			s=s.strip();
@@ -32,48 +50,27 @@ public final class Configuration
 				--depth;
 				if(depth==0)
 				{
-					fieldO=Optional.empty();
+					setter=Optional.empty();
 				}
 			}
-			else if(fieldO.isEmpty())
+			else if(s.charAt(0)=='-')
 			{
-				Field field=null;
-				try
+				setter=switch(s.charAt(1))
 				{
-					field=Configuration.class.getField(s.toLowerCase());
-				}
-				catch(NoSuchFieldException e){}
-				fieldO=Optional.ofNullable(field);
+					case'a'->Optional.of(configuration::setArtifact);
+					case'c'->Optional.of(configuration::addToOptions);
+					case'm'->Optional.of(configuration::setMain);
+					case'o'->Optional.of(configuration::setOutput);
+					case'p'->Optional.of(configuration::addToCP);
+					default->Optional.empty();
+				};
 			}
-			else
+			else if(!setter.isEmpty())
 			{
-				if(String.class.equals(fieldO.get().getType()))
-				{
-					try
-					{
-						fieldO.get().set(configuration,s);
-					}
-					catch(IllegalAccessException e)
-					{
-						e.printStackTrace();
-					}
-				}
-				else
-				{
-					try
-					{
-						@SuppressWarnings("unchecked")
-						var array=(ArrayList<String>)fieldO.get().get(configuration);
-						array.add(s);
-					}
-					catch(IllegalAccessException e)
-					{
-						e.printStackTrace();
-					}
-				}
+				setter.get().accept(s);
 				if(depth==0)
 				{
-					fieldO=Optional.empty();
+					setter=Optional.empty();
 				}
 			}
 		}
