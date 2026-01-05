@@ -32,7 +32,7 @@ public final class Main
 		switch(getMode(args))
 		{
 			case BUILD->builder.jpbuild();
-			case EXECUTE->builder.execute(Arrays.copyOfRange(args,1,args.length));
+			case EXECUTE->builder.execute();
 			case ARCHIVE->builder.archive();
 			case NATIVE->builder.makeNativeLauncher();
 		}

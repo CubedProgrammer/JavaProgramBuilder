@@ -10,6 +10,7 @@ public final class Configuration
 	public static final String CURLIES="{}";
 	public ArrayList<String>classpath;
 	public ArrayList<String>options;
+	public ArrayList<String>executeOptions;
 	public String output;
 	public String artifact;
 	public String main;
@@ -32,6 +33,10 @@ public final class Configuration
 	public void addToOptions(String option)
 	{
 		this.options.add(option);
+	}
+	public void addToExecuteOptions(String option)
+	{
+		this.executeOptions.add(option);
 	}
 	public static Configuration parseConfiguration(String[]args)
 	{
@@ -59,6 +64,7 @@ public final class Configuration
 				{
 					case'a'->Optional.of(configuration::setArtifact);
 					case'c'->Optional.of(configuration::addToOptions);
+					case'e'->Optional.of(configuration::addToExecuteOptions);
 					case'm'->Optional.of(configuration::setMain);
 					case'o'->Optional.of(configuration::setOutput);
 					case'p'->Optional.of(configuration::addToCP);
@@ -97,6 +103,7 @@ public final class Configuration
 	{
 		this.classpath=new ArrayList<String>();
 		this.options=new ArrayList<String>();
+		this.executeOptions=new ArrayList<String>();
 		this.output="";
 		this.artifact="";
 	}

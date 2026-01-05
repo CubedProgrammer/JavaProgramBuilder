@@ -68,15 +68,17 @@ public final class JPBuild
 			}
 		}
 	}
-	public void execute(String[]args)
+	public void execute()
 	{
 		options.classpath.add(options.output);
 		String cp=String.join(":",options.classpath);
 		String[]firstargs={"java","-cp",cp,options.main};
-		String[]cmd=new String[args.length+firstargs.length];
+		String[]cmd=new String[options.executeOptions.size()+firstargs.length];
         System.arraycopy(firstargs,0,cmd,0,firstargs.length);
-		System.arraycopy(args,0,cmd,firstargs.length,args.length);
-		System.out.println(java.util.Arrays.toString(cmd));
+		for(int i=0;i<options.executeOptions.size();i++)
+		{
+			cmd[i+firstargs.length]=options.executeOptions.get(i);
+		}
 		runCommand(cmd);
 	}
 	public void archive()
