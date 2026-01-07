@@ -14,6 +14,7 @@ public final class Configuration
 	public String output;
 	public String artifact;
 	public String main;
+	public boolean display;
 	public void setOutput(String output)
 	{
 		this.output=output;
@@ -58,6 +59,14 @@ public final class Configuration
 					setter=Optional.empty();
 				}
 			}
+			else if(!setter.isEmpty())
+			{
+				setter.get().accept(s);
+				if(depth==0)
+				{
+					setter=Optional.empty();
+				}
+			}
 			else if(s.charAt(0)=='-')
 			{
 				setter=switch(s.charAt(1))
@@ -70,13 +79,16 @@ public final class Configuration
 					case'p'->Optional.of(configuration::addToCP);
 					default->Optional.empty();
 				};
-			}
-			else if(!setter.isEmpty())
-			{
-				setter.get().accept(s);
-				if(depth==0)
+				if(setter.isEmpty())
 				{
-					setter=Optional.empty();
+					switch(s.charAt(1))
+					{
+						case's':
+							configuration.display=true;
+							break;
+						default:
+							System.out.printf("Unrecognized option %c will be ignored.\n",s.charAt(1));
+					}
 				}
 			}
 		}
@@ -106,5 +118,6 @@ public final class Configuration
 		this.executeOptions=new ArrayList<String>();
 		this.output="";
 		this.artifact="";
+		this.display=false;
 	}
 }

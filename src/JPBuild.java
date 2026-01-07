@@ -58,7 +58,10 @@ public final class JPBuild
 							if(file.lastModified()>classFile.lastModified())
 							{
 								cmd[cmd.length-1]=fileString;
-								System.out.println(String.join(" ",cmd));
+								if(options.display)
+								{
+									System.out.println(String.join(" ",cmd));
+								}
 								runCommand(cmd);
 							}
 						}
